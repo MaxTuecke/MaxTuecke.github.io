@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<div id="my_viz"></div>
+
+
+<script>
+
+//Canvas variables
+var margin = 100,
+    width = 600 - 2*margin,
+    height = 450 - 2*margin;
+
+var color = d3.scaleOrdinal()
+    .domain(["Democratic trifecta", "Divided government", "Republican trifecta" ])
+    .range([ "#619CFF", "#bc6df8", "#F8766D"])
+
+var svg = d3.select("#my_viz")
+  .append("svg")
+    .attr("width", width + 2*margin)
+    .attr("height", height + 2*margin)
+  .append("g")
+    .attr("transform",
+          "translate("+margin+","+margin+")");
+
+//Read the data
+d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-states-3times.csv", function(data) {
+
+  // Add X axis
+  var x = d3.scaleLinear()
+    .domain([-0.5, 0.5])
+    .range([ 0, width ]);
+  svg.append("g")
+    .attr("transform", "translate(0,"+height+")")
+    .call(d3.axisBottom(x));
+
+ 
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, .03])
+    .range([ height, 0]);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+// X axis label
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width/2 + 100)
+    .attr("y", height + 35)
+    .text("2016 Margin for Biden");
+    
+ // Y axis label:
+  svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -margin + 12)
+      .attr("x", -margin - height/2 + 100)
+      .text("Case Fatality Rate")
+    
+  var tooltip = d3.select("#my_viz")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "5px")
+    .style("border-radius", "10px")
+    .style("padding", "10px")
+
+  var mouseover = function(d) {
+    tooltip
+      .transition()
+      .duration(200)
+    tooltip
+      .style("opacity", 1)
+      .html("State: " + d.State +
+            "<br> Cases: " + d.Cases2 +
+            "<br> Deaths: " + d.Deaths2)
+      .style("left", (d3.mouse(this)[0]+30) + "px")
+      .style("top", (d3.mouse(this)[1]+50) + "px")
+  }
+
+  var mousemove = function(d) {
+    tooltip
+      .style("left", (d3.mouse(this)[0]+30) + "px")
+      .style("top", (d3.mouse(this)[1]+50) + "px")
+  }
+
+  var mouseleave = function(d) {
+    tooltip
+      .transition()
+      .duration(200)
+      .style("opacity", 0)
+  }
+
+  svg.append('g')
+    .selectAll("dot")
+    .data(data.filter(function(d,i){return i<60}))
+    .enter()
+    .append("circle")
+      .attr("cx", function (d) { return x(d.Margin); } )
+      .attr("cy", function (d) { return y((d.Deaths2-d.Deaths1)/(d.Cases2-d.Cases1)); } )
+      .attr("r", 7)
+      .style("fill", function (d) { return color(d.Government) } )
+      .style("stroke", "white")
+    .on("mouseover", mouseover )
+    .on("mousemove", mousemove )
+    .on("mouseleave", mouseleave )
+    
+    /***************************************
+    Creates the legend
+    ****************************************/
+    var size = 20
+    var allgroups = ["Democratic trifecta", "Divided government", "Republican trifecta"]
+    svg.selectAll("myrect")
+      .data(allgroups)
+      .enter()
+      .append("circle")
+        .attr("cx", width)
+        .attr("cy", function(d,i){ return 10 + i*(size+5)})
+        .attr("r", 7)
+        .style("fill", function(d){ return color(d)})
+
+    // Add labels beside legend dots
+    svg.selectAll("mylabels")
+      .data(allgroups)
+      .enter()
+      .append("text")
+        .attr("x", width + size*.8)
+        .attr("y", function(d,i){ return i * (size + 5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+        .style("fill", function(d){ return color(d)})
+        .text(function(d){ return d})
+        .attr("text-anchor", "left")
+        .style("alignment-baseline", "middle")
+
+})
+
+</script>
