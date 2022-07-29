@@ -1,29 +1,50 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 
+// Scene 1
+
 <script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+    
+<h1 style="text-align:center">COVID Death Rate by State</h1>
+<h2>Pre-Vaccine</h2>
+<p>03-20-2020 --- 12-14-2020</p>
+
+<p>Before vaccines were available, the death rate was strongly correlated to the population density. <p>
+<p>The 3 highest death rates were seen in the higher density states of New York, New Jersey and Massachuetts.</p>
+
+</text>
+<p>Correlation between death rate and population density: Strongly Positive (r = 0.55)</p>
+<p>Correlation between death rate and margin:            Essentially Zero (r = 0.05)</p>
+
+<div id ="Next_Scene" class="center">
+  <a href="https://MaxTuecke.github.io/Scene2.html"> Click for next slide </a>
+</div>
 
 <div id="my_viz"></div>
+
 
 
 <script>
 
 //Canvas variables
-var margin = 100,
-    width = 600 - 2*margin,
-    height = 450 - 2*margin;
+var margin = {top: 40, right: 200, bottom: 60, left: 60},
+    width = 750 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
 
 var color = d3.scaleOrdinal()
-    .domain(["Democratic trifecta", "Divided government", "Republican trifecta" ])
-    .range([ "#619CFF", "#bc6df8", "#F8766D"])
+    .domain(["1st", "2nd", "3rd", "4th" ])
+    .range([ "#bee386", "#57b361", "#60bfbe", "#1e40c7"])
 
 var svg = d3.select("#my_viz")
   .append("svg")
-    .attr("width", width + 2*margin)
-    .attr("height", height + 2*margin)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform",
-          "translate("+margin+","+margin+")");
+          "translate(" + margin.left + "," + margin.top + ")");
+
+
 
 //Read the data
 d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-states-3times.csv", function(data) {
@@ -39,7 +60,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
  
   // Add Y axis
   var y = d3.scaleLinear()
-    .domain([0, .03])
+    .domain([0, 0.9])
     .range([ height, 0]);
   svg.append("g")
     .call(d3.axisLeft(y));
@@ -47,17 +68,48 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
 // X axis label
   svg.append("text")
     .attr("text-anchor", "end")
-    .attr("x", width/2 + 100)
-    .attr("y", height + 35)
+    .attr("x", width/2 + margin.left + 10)
+    .attr("y", height + margin.top + 5)
     .text("2016 Margin for Biden");
     
  // Y axis label:
   svg.append("text")
       .attr("text-anchor", "end")
       .attr("transform", "rotate(-90)")
-      .attr("y", -margin + 12)
-      .attr("x", -margin - height/2 + 100)
-      .text("Case Fatality Rate")
+      .attr("y", -margin.left + 15)
+      .attr("x", -margin.top - height/2 + 150)
+      .text("Deaths per 100,000 per day")
+  
+  // Scales the dot size
+  var dot_size = d3.scaleLinear()
+    .domain([20, 80])
+    .range([ 2, 20]);
+
+  const annotations = [{
+        note: {
+            label: "Death rate is no more than 0.6 per 100,000 per day and is strongly correlated with population density",
+            wrap: 170,
+         },
+         connector: {
+            end: "arrow",
+            type: "curve",
+
+          },
+         color: ["red"],
+          x: 380,
+          y: 150,
+          dy: -1,
+          dx: -210
+        }]
+
+  const makeAnnotations = d3.annotation()
+          .type(d3.annotationLabel)
+          .annotations(annotations)
+
+  d3.select("svg")
+          .append("g")
+          .attr("class", "annotation-group")
+          .call(makeAnnotations)
     
   var tooltip = d3.select("#my_viz")
     .append("div")
@@ -76,11 +128,16 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
     tooltip
       .style("opacity", 1)
       .html("State: " + d.State +
-            "<br> Cases: " + d.Cases2 +
-            "<br> Deaths: " + d.Deaths2)
+            "<br> Cases: " + d.Cases1 +
+            "<br> Deaths: " + d.Deaths1 +
+            "<br> Deaths per 100,000 per day: " + Math.round(1000* 100000*(d.Deaths1)/(d.Population * 329)) / 1000
+             +
+            "<br> Population Density: " + d.PopDensity +
+            "<br> Margin for Biden: " + d.Margin)
       .style("left", (d3.mouse(this)[0]+30) + "px")
       .style("top", (d3.mouse(this)[1]+50) + "px")
   }
+
 
   var mousemove = function(d) {
     tooltip
@@ -101,21 +158,19 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
     .enter()
     .append("circle")
       .attr("cx", function (d) { return x(d.Margin); } )
-      .attr("cy", function (d) { return y((d.Deaths2-d.Deaths1)/(d.Cases2-d.Cases1)); } )
+      .attr("cy", function (d) { return y(Math.round(1000* 100000*(d.Deaths1)/(d.Population * 329)) / 1000); } )
       .attr("r", 7)
-      .style("fill", function (d) { return color(d.Government) } )
+      .style("fill", function (d) { return color(d.PopDensityQuartile) } )
       .style("stroke", "white")
     .on("mouseover", mouseover )
     .on("mousemove", mousemove )
     .on("mouseleave", mouseleave )
     
-    /***************************************
-    Creates the legend
-    ****************************************/
+    //Legend
     var size = 20
-    var allgroups = ["Democratic trifecta", "Divided government", "Republican trifecta"]
-    svg.selectAll("myrect")
-      .data(allgroups)
+    var densityCategories = ["1st", "2nd", "3rd", "4th"]
+    svg.selectAll("rect")
+      .data(densityCategories)
       .enter()
       .append("circle")
         .attr("cx", width)
@@ -124,17 +179,50 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
         .style("fill", function(d){ return color(d)})
 
     // Add labels beside legend dots
-    svg.selectAll("mylabels")
-      .data(allgroups)
+    svg.selectAll("labels")
+      .data(densityCategories)
       .enter()
       .append("text")
         .attr("x", width + size*.8)
-        .attr("y", function(d,i){ return i * (size + 5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+        .attr("y", function(d,i){ return i * (size + 5) + (size/2)})
         .style("fill", function(d){ return color(d)})
         .text(function(d){ return d})
         .attr("text-anchor", "left")
         .style("alignment-baseline", "middle")
+        
+    svg.selectAll("legend_title1")
+          .data(["Population Density Quartile"])
+          .enter()
+          .append("text")
+            .attr("x", 480)
+            .attr("y", function (d, i) { return  -5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+            
 
 })
+
+
+variance = function(u)
+{
+    var n=u.length,alpha = (n/(n-1));
+    var r =  (d3.mean(u.map(function(v) { return v*v;})) - Math.pow(d3.mean(u),2));
+    return alpha*r;
+}
+
+//Subtract mean and divide by sd.
+standardise = function(u)
+{
+    var m = d3.mean(u), s=Math.sqrt(variance(u));
+    return u.map(function(v) { return (v-m)/s;});
+}
+
+//Compute Pearson's correlation between u and v
+corcoef = function(u,v)
+{
+    var us = standardise(u),vs = standardise(v),n=u.length;
+    return (1/(n-1))*d3.sum(us.mult(vs));
+}
 
 </script>
