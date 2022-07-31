@@ -5,6 +5,8 @@
 <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
     
 <h1 style="text-align:center">COVID Death Rate by State</h1>
+<p> Over one million people have died from COVID in the United States. The average death rate for a particular U.S state is related to the population density and the vaccination rate. Moreover, because COVID became politicized, with many conservatives resisting preventative measures, the death rate may also be related to the political leaning of a state, as measured by the 2016 margin for Biden.
+<p>
 <h2 style="text-align:center">Period 1: Pre-Vaccine</h2>
 <p style="text-align:center">03.20.2020 — 12.14.2020</p>
 
@@ -34,6 +36,8 @@ var svg = d3.select("#my_viz")
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
+// Adapted from
+// https://d3-graph-gallery.com/graph/custom_theme.html
 
 //Read the data
 d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-states-3times.csv", function(data) {
@@ -66,7 +70,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .attr("transform", "rotate(-90)")
       .attr("y", -margin.left + 15)
       .attr("x", -margin.top - height/2 + 150)
-      .text("Deaths per 100,000 per day")
+      .text("Average deaths per 100,000 per day")
   
   // Scales the dot size
   var dot_size = d3.scaleLinear()
@@ -91,7 +95,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
         },
         {
         note: {
-            label: "The death rate is moderately correlated with population density.",
+            label: "The death rate is moderately correlated with population density. There is essentially no correcation with the 2016 margin.",
             wrap: 300,
         },
         disable: ["connector"],
@@ -130,7 +134,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .html("State: " + d.State +
             "<br> Cases: " + d.Cases1 +
             "<br> Deaths: " + d.Deaths1 +
-            "<br> Deaths per 100,000 per day: " + Math.round(1000* 100000*(d.Deaths1)/(d.Population * 329)) / 1000
+            "<br> Average deaths per 100,000 per day: " + Math.round(1000* 100000*(d.Deaths1)/(d.Population * 329)) / 1000
              +
             "<br> Population Density: " + d.PopDensity +
             "<br> Margin for Biden: " + d.Margin)
@@ -238,31 +242,6 @@ svg.selectAll("labels5")
             .style("font-size", "14px")
             .style("color", "Black")
             .text(function (d) { return d; });
-            
-
 })
 
-
-variance = function(u)
-{
-    var n=u.length,alpha = (n/(n-1));
-    var r =  (d3.mean(u.map(function(v) { return v*v;})) - Math.pow(d3.mean(u),2));
-    return alpha*r;
-}
-
-//Subtract mean and divide by sd.
-standardise = function(u)
-{
-    var m = d3.mean(u), s=Math.sqrt(variance(u));
-    return u.map(function(v) { return (v-m)/s;});
-}
-
-//Compute Pearson's correlation between u and v
-corcoef = function(u,v)
-{
-    var us = standardise(u),vs = standardise(v),n=u.length;
-    return (1/(n-1))*d3.sum(us.mult(vs));
-}
-
 </script>
-

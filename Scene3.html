@@ -6,14 +6,14 @@
 
 <h1 style="text-align:center">COVID Death Rate by State</h1>
 
-<p> Over one million people have died from COVID in the United States. The average death rate for a particular U.S state is related to the population density and the vaccination rate. Moreover, because COVID became politicized, with many conservatives resisting preventative measures, the political leaning of a state may also be related to the death rate. The 2016 margin for Biden is used as a metric for state political leaning.
+<p> Over one million people have died from COVID in the United States. The average death rate for a particular U.S state is related to the population density and the vaccination rate. Moreover, because COVID became politicized, with many conservatives resisting preventative measures, the death rate may also be related to the political leaning of a state, as measured by the 2016 margin for Biden.
 <p>
 <h2 style="text-align:center">Period 3: Second 6 Months Post-Vaccine</h2>
 <p style="text-align:center">12.15.2020 — 06.14.2021</p>
 
 <div id="my_viz"></div>
 
-<h4 style="text-align:center"> </h4>
+<h1 style="text-align:center"> </h1>
 <p>Move pointer to datapoint to drill down.</p>
 <div id ="Next_Scene" class="center">
   <a href="https://MaxTuecke.github.io/index.html"> Current Slide: 3 of 3. Click for begin again. </a>
@@ -38,7 +38,8 @@ var svg = d3.select("#my_viz")
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
-
+// Adapted from
+// https://d3-graph-gallery.com/graph/custom_theme.html
 
 //Read the data
 d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-states-3times.csv", function(data) {
@@ -72,7 +73,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .attr("transform", "rotate(-90)")
       .attr("y", -margin.left + 15)
       .attr("x", -margin.top - height/2 + 150)
-      .text("Deaths per 100,000 per day")
+      .text("Average deaths per 100,000 per day")
   
   // Scales the dot size
   var dot_size = d3.scaleLinear()
@@ -97,13 +98,13 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
         },
         {
         note: {
-            label: "Both vaccination rate and margin are strongly correlated to the death rate",
-            wrap: 300,
+            label: "As compared to the previous time period, there is an increased negative correlation between the death rate and both the vaccination rate and margin.",
+            wrap: 350,
         },
         disable: ["connector"],
         color: ["red"],
-          x: 80,
-          y: 25,
+          x: 100,
+          y: 35,
           dy: .2,
           dx: 150
         }
@@ -125,7 +126,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
     .style("background-color", "white")
     .style("border", "solid")
     .style("border-width", "2px")
-    .style("border-radius", "10px")
+    .style("border-radius", "5px")
     .style("padding", "10px")
 
   var mouseover = function(d) {
@@ -137,7 +138,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .html("State: " + d.State +
             "<br> Cases: " + d.Cases1 +
             "<br> Deaths: " + d.Deaths1 +
-            "<br> Deaths per 100,000 per day: " + Math.round(1000* 100000*(d.Deaths3 -d.Deaths2)/(d.Population * 181)) / 1000
+            "<br> Average deaths per 100,000 per day: " + Math.round(1000* 100000*(d.Deaths3 -d.Deaths2)/(d.Population * 181)) / 1000
              +
             "<br> Population Density: " + d.PopDensity +
             "<br> 2016 Margin for Biden: " + d.Margin +
@@ -214,7 +215,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .enter()
       .append("text")
         .attr("x", 500)
-        .attr("y", function (d, i) { return 260-5 + i * 10; })
+        .attr("y", function (d, i) { return 255 + i * 10; })
             .style("font-size", "14px")
             .style("color", "Black")
             .text(function (d) { return d; });
@@ -224,7 +225,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .enter()
       .append("text")
         .attr("x", 500)
-        .attr("y", function (d, i) { return 300-5 + i * 10; })
+        .attr("y", function (d, i) { return 295 + i * 10; })
             .style("font-size", "14px")
             .style("color", "Black")
             .text(function (d) { return d; });

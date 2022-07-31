@@ -4,6 +4,8 @@
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
 <h1 style="text-align:center">COVID Death Rate by State</h1>
+<p> Over one million people have died from COVID in the United States. The average death rate for a particular U.S state is related to the population density and the vaccination rate. Moreover, because COVID became politicized, with many conservatives resisting preventative measures, the death rate may also be related to the political leaning of a state, as measured by the 2016 margin for Biden.
+<p>
 <h2 style="text-align:center">Period 2: First 6 Months Post-Vaccine</h2>
 <p style="text-align:center">12.15.2020 — 06.14.2021</p>
 
@@ -34,6 +36,9 @@ var svg = d3.select("#my_viz")
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
+
+// Adapted from
+// https://d3-graph-gallery.com/graph/custom_theme.html
 
 //Read the data
 d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-states-3times.csv", function(data) {
@@ -67,7 +72,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .attr("transform", "rotate(-90)")
       .attr("y", -margin.left + 15)
       .attr("x", -margin.top - height/2 + 150)
-      .text("Deaths per 100,000 per day")
+      .text("Average deaths per 100,000 per day")
   
   // Scales the dot size
   var dot_size = d3.scaleLinear()
@@ -143,7 +148,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .html("State: " + d.State +
             "<br> Cases: " + d.Cases1 +
             "<br> Deaths: " + d.Deaths1 +
-            "<br> Deaths per 100,000 per day: " +  Math.round(1000* 100000*(d.Deaths2 - d.Deaths1)/(d.Population * 180)) / 1000
+            "<br> Average deaths per 100,000 per day: " +  Math.round(1000* 100000*(d.Deaths2 - d.Deaths1)/(d.Population * 180)) / 1000
              +
             "<br> Population Density: " + d.PopDensity +
             "<br> Vaccinations per 100: " + d.Vaccination2)
@@ -266,5 +271,3 @@ svg.selectAll("labels6")
 })
 
 </script>
-
-
