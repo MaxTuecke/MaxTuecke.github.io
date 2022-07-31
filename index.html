@@ -1,30 +1,26 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 
-// Scene 1
-
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
     
 <h1 style="text-align:center">COVID Death Rate by State</h1>
-<h2>Pre-Vaccine</h2>
-<p>03-20-2020 --- 12-14-2020</p>
-
-<p>Before vaccines were available, the death rate was strongly correlated to the population density. <p>
-<p>The 3 highest death rates were seen in the higher density states of New York, New Jersey and Massachuetts.</p>
-
-</text>
-<p>Correlation between death rate and population density: Strongly Positive (r = 0.55)</p>
-<p>Correlation between death rate and margin:            Essentially Zero (r = 0.05)</p>
+<h2 style="text-align:center">Period 1: Pre-Vaccine</h2>
+<p style="text-align:center">03.20.2020 — 12.14.2020</p>
 
 <div id="my_viz"></div>
 
+<h4 style="text-align:center"> </h4>
+<p>Move pointer to datapoint to drill down.</p>
+<div id ="Next_Scene" class="center">
+  <a href="https://MaxTuecke.github.io/Scene2.html"> Current Slide: 1 of 3. Click for next slide </a>
+</div>
 
 <script>
 
 //Canvas variables
-var margin = {top: 40, right: 200, bottom: 60, left: 60},
-    width = 750 - margin.left - margin.right,
+var margin = {top: 40, right: 300, bottom: 60, left: 60},
+    width = 850 - margin.left - margin.right,
     height = 450 - margin.top - margin.bottom;
 
 var color = d3.scaleOrdinal()
@@ -39,7 +35,6 @@ var svg = d3.select("#my_viz")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
-
 //Read the data
 d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-states-3times.csv", function(data) {
 
@@ -51,10 +46,9 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
     .attr("transform", "translate(0,"+height+")")
     .call(d3.axisBottom(x));
 
- 
   // Add Y axis
   var y = d3.scaleLinear()
-    .domain([0, 0.9])
+    .domain([0, 1])
     .range([ height, 0]);
   svg.append("g")
     .call(d3.axisLeft(y));
@@ -81,7 +75,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
 
   const annotations = [{
         note: {
-            label: "Death rate is no more than 0.6 per 100,000 per day and is strongly correlated with population density",
+            label: "Greatest death rate is about 0.6 per 100,000 per day.",
             wrap: 170,
          },
          connector: {
@@ -91,9 +85,21 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
           },
          color: ["red"],
           x: 380,
-          y: 150,
+          y: 170,
           dy: -1,
           dx: -210
+        },
+        {
+        note: {
+            label: "The death rate is moderately correlated with population density.",
+            wrap: 300,
+        },
+        disable: ["connector"],
+        color: ["red"],
+          x: 80,
+          y: 25,
+          dy: .2,
+          dx: 150
         }]
 
   const makeAnnotations = d3.annotation()
@@ -111,7 +117,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
     .attr("class", "tooltip")
     .style("background-color", "white")
     .style("border", "solid")
-    .style("border-width", "5px")
+    .style("border-width", "2px")
     .style("border-radius", "10px")
     .style("padding", "10px")
 
@@ -167,8 +173,8 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .data(densityCategories)
       .enter()
       .append("circle")
-        .attr("cx", width)
-        .attr("cy", function(d,i){ return 10 + i*(size+5)})
+        .attr("cx", width + 20)
+        .attr("cy", function(d,i){ return 150 + i*(size+5)})
         .attr("r", 7)
         .style("fill", function(d){ return color(d)})
 
@@ -177,25 +183,65 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .data(densityCategories)
       .enter()
       .append("text")
-        .attr("x", width + size*.8)
-        .attr("y", function(d,i){ return i * (size + 5) + (size/2)})
+        .attr("x", width + 20 + size*.8)
+        .attr("y", function(d,i){ return 140 + i * (size + 5) + (size/2)})
         .style("fill", function(d){ return color(d)})
         .text(function(d){ return d})
         .attr("text-anchor", "left")
         .style("alignment-baseline", "middle")
-        
-    svg.selectAll("lengend_title1")
+
+        svg.selectAll("lengend_title1")
           .data(["Population Density Quartile"])
           .enter()
           .append("text")
-            .attr("x", 480)
-            .attr("y", function (d, i) { return  -5 + i * 10; })
+            .attr("x", 500)
+            .attr("y", function (d, i) { return 130-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+            
+    svg.selectAll("labels2")
+      .data(["Bubble size ~ vaccinations per 100"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 260-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+  svg.selectAll("labels3")
+      .data([ "Correlations:"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 300-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+         
+svg.selectAll("labels4")
+      .data([ "Death rate and 2016 Biden margin-- r = +0.05"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 320-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+
+svg.selectAll("labels5")
+      .data([ " Death rate and population density--- r = +0.55"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 335-5 + i * 10; })
             .style("font-size", "14px")
             .style("color", "Black")
             .text(function (d) { return d; });
             
 
 })
+
 
 variance = function(u)
 {
@@ -219,3 +265,4 @@ corcoef = function(u,v)
 }
 
 </script>
+
