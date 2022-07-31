@@ -3,27 +3,24 @@
 
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
-    
 <h1 style="text-align:center">COVID Death Rate by State</h1>
-<h2>First 6 Months Post-Vaccine</h2>
-<p>12-15-2020 --- 06-14-2021</p>
+<h2 style="text-align:center">Period 2: First 6 Months Post-Vaccine</h2>
+<p style="text-align:center">12.15.2020 — 06.14.2021</p>
 
-<p>The death rate is no longer strongly correlated with population density, but is moderately negatively correlated with vaccination rate. <p>
-
-<p>The 3 highest death rates were seen in the lower density states of Arizona, Alabama and Oaklahoma, all of which had lower vaccination rates and lower margins for Biden.</p>
-
-</text>
-<p>Correlation between death rate and margin:            Mildly Negative (r = -0.24)</p>
-<p>Correlation between death rate and population density: Mildly Posiitive (0.19)</p>
-<p>Correlation between death rate and vaccination rate:    Moderately Negative (-0.38)</p>
 <div id="my_viz"></div>
 
+<h4 style="text-align:center"> </h4>
+<p>Move pointer to datapoint to drill down.</p>
+<div id ="Next_Scene" class="center">
+  <a href="https://MaxTuecke.github.io/Scene3.html"> Current Slide: 2 of 3. Click for next slide </a>
+</div>
 
 <script>
 
-//Canvas variables
-var margin = {top: 40, right: 200, bottom: 60, left: 60},
-    width = 750 - margin.left - margin.right,
+var slide_num = 2
+
+var margin = {top: 40, right: 300, bottom: 60, left: 60},
+    width = 850 - margin.left - margin.right,
     height = 450 - margin.top - margin.bottom;
 
 var color = d3.scaleOrdinal()
@@ -38,9 +35,9 @@ var svg = d3.select("#my_viz")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
-
 //Read the data
 d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-states-3times.csv", function(data) {
+
 
   // Add X axis
   var x = d3.scaleLinear()
@@ -50,10 +47,9 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
     .attr("transform", "translate(0,"+height+")")
     .call(d3.axisBottom(x));
 
- 
   // Add Y axis
   var y = d3.scaleLinear()
-    .domain([0, .9])
+    .domain([0, 1])
     .range([ height, 0]);
   svg.append("g")
     .call(d3.axisLeft(y));
@@ -80,8 +76,8 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
 
  const annotations = [{
         note: {
-            label: "The greatest death rate has increased to no more than 0.9 per 100,000 per day and is negatively correlated with population vaccination rate",
-            wrap: 250,
+            label: "The greatest death rate has increased to about 0.8 per 100,000 per day",
+            wrap: 200,
          },
          connector: {
             end: "arrow",
@@ -90,6 +86,30 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
           },
          color: ["red"],
           x: 310,
+          y: 100,
+          dy: .2,
+          dx: 150
+        },
+        {
+        note: {
+            label: "Decreased correlation between death rate and population density",
+            wrap: 300,
+        },
+        disable: ["connector"],
+        color: ["red"],
+          x: 80,
+          y: 15,
+          dy: .2,
+          dx: 150
+        },
+        {
+        note: {
+            label: "Moderate negative correlation between death rate and vaccination rate",
+            wrap: 300,
+        },
+        disable: ["connector"],
+        color: ["red"],
+          x: 80,
           y: 60,
           dy: .2,
           dx: 150
@@ -110,7 +130,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
     .attr("class", "tooltip")
     .style("background-color", "white")
     .style("border", "solid")
-    .style("border-width", "5px")
+    .style("border-width", "2px")
     .style("border-radius", "10px")
     .style("padding", "10px")
 
@@ -123,9 +143,10 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
       .html("State: " + d.State +
             "<br> Cases: " + d.Cases1 +
             "<br> Deaths: " + d.Deaths1 +
-            "<br> Deaths per 100,000 per day: " + Math.round(1000* 100000*(d.Deaths2 -d.Deaths1)/(d.Population * 180)) / 1000
+            "<br> Deaths per 100,000 per day: " +  Math.round(1000* 100000*(d.Deaths2 - d.Deaths1)/(d.Population * 180)) / 1000
              +
-            "<br> Population Density: " + d.PopDensity)
+            "<br> Population Density: " + d.PopDensity +
+            "<br> Vaccinations per 100: " + d.Vaccination2)
       .style("left", (d3.mouse(this)[0]+30) + "px")
       .style("top", (d3.mouse(this)[1]+50) + "px")
   }
@@ -182,8 +203,8 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
         .text(function(d){ return d})
         .attr("text-anchor", "left")
         .style("alignment-baseline", "middle")
-        
-    svg.selectAll("lengend_title1")
+
+        svg.selectAll("lengend_title1")
           .data(["Population Density Quartile"])
           .enter()
           .append("text")
@@ -192,7 +213,58 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
             .style("font-size", "14px")
             .style("color", "Black")
             .text(function (d) { return d; });
+            
+    svg.selectAll("labels2")
+      .data(["Bubble size ~ vaccinations per 100"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 260-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+  svg.selectAll("labels3")
+      .data([ "Correlations:"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 300-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+         
+svg.selectAll("labels4")
+      .data([ "Death rate and 2016 Biden margin-- r = -0.24"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 320-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+
+svg.selectAll("labels5")
+      .data([ " Death rate and population density--- r = +0.19"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 335-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+
+svg.selectAll("labels6")
+      .data([ "Death rate and vaccination rate------ r = -0.38"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 350-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
 
 })
 
 </script>
+
+
