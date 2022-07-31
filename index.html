@@ -17,12 +17,7 @@
 <p>Correlation between death rate and population density: Strongly Positive (r = 0.55)</p>
 <p>Correlation between death rate and margin:            Essentially Zero (r = 0.05)</p>
 
-<div id ="Next_Scene" class="center">
-  <a href="https://MaxTuecke.github.io/Scene2.html"> Click for next slide </a>
-</div>
-
 <div id="my_viz"></div>
-
 
 
 <script>
@@ -43,7 +38,6 @@ var svg = d3.select("#my_viz")
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
-
 
 
 //Read the data
@@ -190,7 +184,7 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
         .attr("text-anchor", "left")
         .style("alignment-baseline", "middle")
         
-    svg.selectAll("legend_title1")
+    svg.selectAll("lengend_title1")
           .data(["Population Density Quartile"])
           .enter()
           .append("text")
@@ -202,7 +196,6 @@ d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-
             
 
 })
-
 
 variance = function(u)
 {
