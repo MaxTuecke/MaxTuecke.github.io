@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
+<h1 style="text-align:center">COVID Death Rate by State</h1>
+<h2 style="text-align:center">Period 3: Second 6 Months Post-Vaccine</h2>
+<p style="text-align:center">12.15.2020 — 06.14.2021</p>
+
+<div id="my_viz"></div>
+
+<h4 style="text-align:center"> </h4>
+<p>Move pointer to datapoint to drill down.</p>
+<div id ="Next_Scene" class="center">
+  <a href="https://MaxTuecke.github.io/index.html"> Current Slide: 3 of 3. Click for begin again. </a>
+</div>
+
+
+<script>
+
+//Canvas variables
+var margin = {top: 40, right: 300, bottom: 60, left: 60},
+    width = 850 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+var color = d3.scaleOrdinal()
+    .domain(["1st", "2nd", "3rd", "4th" ])
+    .range([ "#bee386", "#57b361", "#60bfbe", "#1e40c7"])
+
+var svg = d3.select("#my_viz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+
+//Read the data
+d3.csv("https://raw.githubusercontent.com/MaxTuecke/MaxTuecke.github.io/main/us-states-3times.csv", function(data) {
+
+  // Add X axis
+  var x = d3.scaleLinear()
+    .domain([-0.5, 0.5])
+    .range([ 0, width ]);
+  svg.append("g")
+    .attr("transform", "translate(0,"+height+")")
+    .call(d3.axisBottom(x));
+
+ 
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 1])
+    .range([ height, 0]);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+// X axis label
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width/2 + margin.left + 10)
+    .attr("y", height + margin.top + 5)
+    .text("2016 Margin for Biden");
+    
+ // Y axis label:
+  svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -margin.left + 15)
+      .attr("x", -margin.top - height/2 + 150)
+      .text("Deaths per 100,000 per day")
+  
+  // Scales the dot size
+  var dot_size = d3.scaleLinear()
+    .domain([20, 80])
+    .range([ 2, 20]);
+
+ const annotations = [{
+        note: {
+            label: "The greatest death rate has decreased slightyly from the previous six months. ",
+            wrap: 200,
+         },
+         connector: {
+            end: "arrow",
+            type: "curve",
+            points: 1
+          },
+         color: ["red"],
+          x: 100,
+          y: 120,
+          dy: .2,
+          dx: 350
+        },
+        {
+        note: {
+            label: "Both vaccination rate and margin are strongly correlated to the death rate",
+            wrap: 300,
+        },
+        disable: ["connector"],
+        color: ["red"],
+          x: 80,
+          y: 25,
+          dy: .2,
+          dx: 150
+        }
+        ]
+
+  const makeAnnotations = d3.annotation()
+          .type(d3.annotationLabel)
+          .annotations(annotations)
+
+  d3.select("svg")
+          .append("g")
+          .attr("class", "annotation-group")
+          .call(makeAnnotations)
+    
+  var tooltip = d3.select("#my_viz")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "10px")
+    .style("padding", "10px")
+
+  var mouseover = function(d) {
+    tooltip
+      .transition()
+      .duration(200)
+    tooltip
+      .style("opacity", 1)
+      .html("State: " + d.State +
+            "<br> Cases: " + d.Cases1 +
+            "<br> Deaths: " + d.Deaths1 +
+            "<br> Deaths per 100,000 per day: " + Math.round(1000* 100000*(d.Deaths3 -d.Deaths2)/(d.Population * 180)) / 1000
+             +
+            "<br> Population Density: " + d.PopDensity +
+            "<br> Vaccinations per 100: " + d.Vaccination3)
+      .style("left", (d3.mouse(this)[0]+30) + "px")
+      .style("top", (d3.mouse(this)[1]+50) + "px")
+  }
+
+
+  var mousemove = function(d) {
+    tooltip
+      .style("left", (d3.mouse(this)[0]+30) + "px")
+      .style("top", (d3.mouse(this)[1]+50) + "px")
+  }
+
+  var mouseleave = function(d) {
+    tooltip
+      .transition()
+      .duration(200)
+      .style("opacity", 0)
+  }
+
+  svg.append('g')
+    .selectAll("dot")
+    .data(data.filter(function(d,i){return i<60}))
+    .enter()
+    .append("circle")
+      .attr("cx", function (d) { return x(d.Margin); } )
+      .attr("cy", function (d) { return y(Math.round(1000* 100000*(d.Deaths3 - d.Deaths2)/(d.Population * 180)) / 1000); } )
+      .attr("r", function (d) { return dot_size(d.Vaccination2); } )
+//      .attr("r", 7)
+      .style("fill", function (d) { return color(d.PopDensityQuartile) } )
+      .style("stroke", "white")
+    .on("mouseover", mouseover )
+    .on("mousemove", mousemove )
+    .on("mouseleave", mouseleave )
+    
+    //Legend
+    var size = 20
+    var densityCategories = ["1st", "2nd", "3rd", "4th"]
+    svg.selectAll("rect")
+      .data(densityCategories)
+      .enter()
+      .append("circle")
+        .attr("cx", width + 20)
+        .attr("cy", function(d,i){ return 150 + i*(size+5)})
+        .attr("r", 7)
+        .style("fill", function(d){ return color(d)})
+
+    // Add labels beside legend dots
+    svg.selectAll("labels")
+      .data(densityCategories)
+      .enter()
+      .append("text")
+        .attr("x", width + 20 + size*.8)
+        .attr("y", function(d,i){ return 140 + i * (size + 5) + (size/2)})
+        .style("fill", function(d){ return color(d)})
+        .text(function(d){ return d})
+        .attr("text-anchor", "left")
+        .style("alignment-baseline", "middle")
+
+        svg.selectAll("lengend_title1")
+          .data(["Population Density Quartile"])
+          .enter()
+          .append("text")
+            .attr("x", 500)
+            .attr("y", function (d, i) { return 130-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+            
+    svg.selectAll("labels2")
+      .data(["Bubble size ~ vaccinations per 100"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 260-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+  svg.selectAll("labels3")
+      .data([ "Correlations:"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 300-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+         
+svg.selectAll("labels4")
+      .data([ "Death rate and 2016 Biden margin-- r = -0.75"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 320-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+
+svg.selectAll("labels5")
+      .data([ " Death rate and population density--- r = -0.47"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 335-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+
+svg.selectAll("labels6")
+      .data([ "Death rate and vaccination rate------ r = -0.80"])
+      .enter()
+      .append("text")
+        .attr("x", 500)
+        .attr("y", function (d, i) { return 350-5 + i * 10; })
+            .style("font-size", "14px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+})
+
+</script>
